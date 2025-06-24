@@ -33,9 +33,7 @@ app.get("/", (req, res) => {
     });
 });
 
-app.listen(8081, () => {
-    console.log("A porta 8081 está funcionando.");
-});
+
 
 app.post("/clientes", (req, res) => {
   const { nome, endereco, e_mail, telefone, tipo_cliente, cpf, cnpj } = req.body;
@@ -62,4 +60,47 @@ app.post("/clientes", (req, res) => {
       message: "Cliente cadastrado com sucesso"
     });
   });
+});
+
+app.get("/", (req, res) => {
+    const sql = "SELECT * FROM EQUIPAMENTO";
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Erro de solicitação: ", err);
+            return res.status(500).json({ error: "Erro do banco de dados." });
+        }
+        return res.json(data);
+    });
+});
+
+app.post("/equipamento", (req, res) => {
+  const { marca, modelo, numero_serie, tipo} = req.body;
+  
+  if (!marca || !modelo || !numero_serie || !tipo) {
+    return res.status(400).json({ error: "Faltou preencher dados." });
+  }
+
+  const sql = `
+    INSERT INTO EQUIPAMENTO 
+    (marca, modelo, numero_serie, tipo) 
+    VALUES (?, ?, ?, ?)
+  `;
+
+  
+  const values = [marca, modelo, numero_serie, tipo];
+  
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Insert error:", err);
+      return res.status(500).json({ error: "Falha ao inserir no banco de dados." });
+    }
+    return res.status(201).json({
+      id: result.insertId,
+      message: "Equipamento cadastrado com sucesso"
+    });
+  });
+});
+
+app.listen(8081, () => {
+    console.log("A porta 8081 está funcionando.");
 });
