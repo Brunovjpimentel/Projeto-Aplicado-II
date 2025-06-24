@@ -52,7 +52,7 @@ const CadastrarClientes = () => {
   const cpfPattern = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}";
   const cnpjPattern = "\\d{3}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2}";
   const pattern = isPessoaJuridica ? cnpjPattern : cpfPattern;
-  const placeholder = isPessoaJuridica ? "000.000.000/0000-00" : "000.000.000-00";
+  const placeholder = isPessoaJuridica ? "00.000.000/0000-00" : "000.000.000-00";
   const maxLength = isPessoaJuridica ? 19 : 14;
 
   return (
