@@ -6,22 +6,35 @@ const ListarContrato = () => {
     const [contratos, setContratos] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Dados de exemplo - posteriormente será substituído pela busca real da API
-    useEffect(() => {
-        // Função para buscar contratos da API
-        const buscarContratos = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get('http://localhost:8081/listarcontratos');
-                setContratos(response.data);
-            } catch (error) {
-                console.error('Erro ao buscar contratos:', error);
-                setContratos([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Função para buscar contratos da API
+    const buscarContratos = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:8081/listarcontratos');
+            setContratos(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar contratos:', error);
+            setContratos([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    // Função para deletar contrato
+    const deletarContrato = async (id) => {
+        if (window.confirm('Tem certeza que deseja excluir este contrato?')) {
+            try {
+                await axios.delete(`http://localhost:8081/listarcontratos/${id}`);
+                alert('Contrato excluído com sucesso!');
+                buscarContratos(); // Recarrega a lista
+            } catch (error) {
+                console.error('Erro ao excluir contrato:', error);
+                alert('Erro ao excluir contrato. Tente novamente.');
+            }
+        }
+    };
+
+    useEffect(() => {
         buscarContratos();
     }, []);
 
@@ -85,6 +98,7 @@ const ListarContrato = () => {
                                                             <button 
                                                                 className="btn btn-danger btn-sm"
                                                                 title="Excluir"
+                                                                onClick={() => deletarContrato(contrato.id)}
                                                             >
                                                                 Excluir
                                                             </button>

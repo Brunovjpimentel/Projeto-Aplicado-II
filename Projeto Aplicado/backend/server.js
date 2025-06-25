@@ -124,6 +124,21 @@ app.get("/listarcontratos", (req, res) => {
     });
 });
 
+app.delete("/listarcontratos/:id", (req, res) => {
+    const contratoId = req.params.id;
+    const sql = "DELETE FROM LOCACAO WHERE id = ?";
+    
+    db.query(sql, [contratoId], (err, result) => {
+        if (err) {
+            console.error("Erro ao deletar contrato:", err);
+            return res.status(500).json({ error: "Erro do banco de dados." });
+        }
+        return res.json({ message: "Contrato deletado com sucesso." });
+    });
+});
+
+
+
 
 app.listen(8081, () => {
     console.log("A porta 8081 está funcionando.");
