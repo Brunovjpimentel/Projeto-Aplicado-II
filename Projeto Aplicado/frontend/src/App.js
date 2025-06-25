@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Cliente from './pages/Cliente'
 import Equipamento from './pages/Equipamento'
 import Contrato from './pages/Contrato'
+import ListarContrato from './pages/ListarContrato'
 import Nav from 'react-bootstrap/Nav';
 
 function App() {
@@ -24,15 +25,16 @@ function App() {
           <Nav.Item>
             <Nav.Link as={Link} to="/Contratos">Cadastrar Contratos</Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link as={Link} to="/ListarContratos">Listar Contratos</Nav.Link>
+          </Nav.Item>
         </Nav>
         <Routes>
-          <Route path='/Clientes' element={<Cliente />}></Route>
-        </Routes>
-        <Routes>
-          <Route path='/Equipamentos' element={<Equipamento />}></Route>
-        </Routes>
-        <Routes>
-          <Route path='/Contratos' element={<Contrato />}></Route>
+          <Route path='/Clientes' element={<Cliente />} />
+          <Route path='/Equipamentos' element={<Equipamento />} />
+          <Route path='/Contratos' element={<Contrato />} />
+          <Route path='/ListarContratos' element={<ListarContrato />} />
+          <Route path='/' element={<div>Página Inicial</div>} />
         </Routes>
       </BrowserRouter>
     </div>
