@@ -22,7 +22,7 @@ db.connect(err => {
     console.log("Conectado ao banco de dados com sucesso.");
 });
 
-app.get("/", (req, res) => {
+app.get("/clientes", (req, res) => {
     const sql = "SELECT * FROM CLIENTE";
     db.query(sql, (err, data) => {
         if (err) {
@@ -32,7 +32,6 @@ app.get("/", (req, res) => {
         return res.json(data);
     });
 });
-
 
 
 app.post("/clientes", (req, res) => {
@@ -62,7 +61,7 @@ app.post("/clientes", (req, res) => {
   });
 });
 
-app.get("/", (req, res) => {
+app.get("/equipamento", (req, res) => {
     const sql = "SELECT * FROM EQUIPAMENTO";
     db.query(sql, (err, data) => {
         if (err) {
@@ -100,6 +99,31 @@ app.post("/equipamento", (req, res) => {
     });
   });
 });
+
+app.get("/listarcontratos", (req, res) => {
+    const sql = `
+        SELECT 
+            l.id,
+            c.nome as cliente,
+            CONCAT(e.marca, ' ', e.modelo) as equipamento,
+            l.data_locacao as dataInicio,
+            l.data_devolucao as dataFim,
+            FORMAT(l.valor, 2) as valor,
+            l.status
+        FROM LOCACAO l
+        JOIN CLIENTE c ON l.FK_CLIENTE_id = c.id  
+        JOIN EQUIPAMENTO e ON l.FK_EQUIPAMENTO_id = e.id
+        ORDER BY l.id DESC
+    `;
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Erro de solicitação: ", err);
+            return res.status(500).json({ error: "Erro do banco de dados." });
+        }
+        return res.json(data);
+    });
+});
+
 
 app.listen(8081, () => {
     console.log("A porta 8081 está funcionando.");
