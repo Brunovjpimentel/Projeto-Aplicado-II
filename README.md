@@ -8,7 +8,6 @@
   As tecnologias utilizadas foram:
   - **Frontend:**	React, React Router
   - **UI Framework:** Bootstrap 5
-  - **Verificação de Status:** React Hooks
   - **Backend:** Node.js, Express
   - **Database:** MySQL
   - **HTTP Client:** Axios
