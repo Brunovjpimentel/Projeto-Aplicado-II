@@ -50,21 +50,20 @@ const CadastrarClientes = () => {
 
   const isPessoaJuridica = tipo === 'Pessoa Jurídica';
   const cpfPattern = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}";
-  const cnpjPattern = "\\d{3}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2}";
+  const cnpjPattern = "\\d{2}\\.\\d{3}\\.\\d{3}\\/\\d{4}-\\d{2}";
   const pattern = isPessoaJuridica ? cnpjPattern : cpfPattern;
   const placeholder = isPessoaJuridica ? "00.000.000/0000-00" : "000.000.000-00";
-  const maxLength = isPessoaJuridica ? 19 : 14;
+  const maxLength = isPessoaJuridica ? 18 : 14;
 
   return (
     <div className="container mt-4">
       <div className="card">
         <div className="card-header bg-primary text-white">
-          <h2 className="mb-0" style={{textAlign: 'center'}}>{"Cadastrar Cliente"}</h2>
+          <h2 className="mb-0" style={{ textAlign: 'center' }}>{"Cadastrar Cliente 🛍️"}</h2>
         </div>
-        
+
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            {/* Nome */}
             <div className="form-group mb-3">
               <label className="form-label">Nome (Obrigatório)</label>
               <input
@@ -78,7 +77,6 @@ const CadastrarClientes = () => {
               />
             </div>
 
-            {/* Endereço */}
             <div className="form-group mb-3">
               <label className="form-label">Endereço (Obrigatório)</label>
               <input
@@ -92,7 +90,6 @@ const CadastrarClientes = () => {
               />
             </div>
 
-            {/* Email */}
             <div className="form-group mb-3">
               <label className="form-label">Email (Obrigatório)</label>
               <input
@@ -109,7 +106,6 @@ const CadastrarClientes = () => {
               </small>
             </div>
 
-            {/* Telefone */}
             <div className="form-group mb-3">
               <label className="form-label">Telefone (Obrigatório)</label>
               <input
@@ -127,12 +123,11 @@ const CadastrarClientes = () => {
               </small>
             </div>
 
-            {/* Tipo */}
             <div className="form-group mb-3">
               <label className="form-label">Tipo</label>
-              <select 
+              <select
                 className="form-select"
-                value={tipo} 
+                value={tipo}
                 onChange={handleTipoChange}
               >
                 <option value="Pessoa Física">Pessoa Física</option>
@@ -140,7 +135,6 @@ const CadastrarClientes = () => {
               </select>
             </div>
 
-            {/* CPF/CNPJ */}
             <div className="form-group mb-4">
               <label className="form-label">CPF/CNPJ (Obrigatório)</label>
               <input
@@ -154,24 +148,24 @@ const CadastrarClientes = () => {
                 onChange={handleChange}
                 title={
                   isPessoaJuridica
-                    ? "Formato: 000.000.000/0000-00"
+                    ? "Formato: 00.000.000/0000-00"
                     : "Formato: 000.000.000-00"
                 }
                 required
               />
               <small className="form-text text-muted">
                 {isPessoaJuridica
-                  ? "Formato CNPJ: 000.000.000/0000-00"
+                  ? "Formato CNPJ: 00.000.000/0000-00"
                   : "Formato CPF: 000.000.000-00"}
               </small>
             </div>
 
             <div className="d-flex justify-content-between">
               <div>
-                <Link to="/historico" className="btn btn-outline-primary me-2">
+                <Link to="/ListarContrato" className="btn btn-outline-primary me-2">
                   Histórico de Locações
                 </Link>
-                <Link to="/historico" className="btn btn-outline-primary">
+                <Link to="/ListarContrato" className="btn btn-outline-primary">
                   Gerenciar Contratos
                 </Link>
               </div>

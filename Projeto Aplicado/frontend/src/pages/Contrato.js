@@ -14,12 +14,43 @@ const CadastrarContrato = () => {
   const [equipamentos, setEquipamentos] = useState([]);
   const [numeroContrato, setNumeroContrato] = useState(null);
   const [errors, setErrors] = useState({});
+  const [clientes, setClientes] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     axios.get('http://localhost:8081/equipamento')
       .then(res => setEquipamentos(res.data))
       .catch(err => console.error('Erro ao buscar equipamentos:', err));
+
+    axios.get('http://localhost:8081/clientes')
+      .then(res => setClientes(res.data))
+      .catch(err => console.error('Erro ao buscar clientes:', err));
   }, []);
+
+  const handleClientSearch = (e) => {
+    const term = e.target.value;
+    setFormData(prev => ({ ...prev, cliente: term }));
+
+    if (term.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    const filtered = clientes.filter(cliente =>
+      cliente.nome.toLowerCase().includes(term.toLowerCase()) ||
+      (cliente.cpf && cliente.cpf.includes(term)) ||
+      (cliente.cnpj && cliente.cnpj.includes(term))
+    );
+    setSearchResults(filtered);
+    setIsSearching(false);
+  };
+
+  const selectClient = (cliente) => {
+    setFormData(prev => ({ ...prev, cliente: cliente.cpf || cliente.cnpj }));
+    setSearchResults([]);
+  };
 
   const gerarNumeroContrato = () => 'CTR-' + Date.now();
 
@@ -41,9 +72,7 @@ const CadastrarContrato = () => {
     if (formData.data_locacao && formData.data_devolucao) {
       const locacao = new Date(formData.data_locacao);
       const devolucao = new Date(formData.data_devolucao);
-      if (devolucao < locacao) {
-        newErrors.data_devolucao = 'A data de devolução não pode ser anterior à data de locação.';
-      }
+      if (devolucao < locacao) newErrors.data_devolucao = 'A data de devolução não pode ser anterior à data de locação.';
     }
 
     setErrors(newErrors);
@@ -55,17 +84,30 @@ const CadastrarContrato = () => {
 
     if (!validarCampos()) return;
 
-    const numero = gerarNumeroContrato();
-    const dadosContrato = {
-      ...formData,
-      numero_contrato: numero
-    };
-
     try {
+      const clientResponse = await axios.get('http://localhost:8081/clientes/find', {
+        params: { q: formData.cliente }
+      });
+
+      if (!clientResponse.data) {
+        alert('Cliente não encontrado! Por favor, selecione um cliente válido da lista.');
+        return;
+      }
+
+      const clientId = clientResponse.data.id;
+
+      const dadosContrato = {
+        cliente_id: clientId,
+        equipamento_id: parseInt(formData.equipamento_id),
+        data_locacao: formData.data_locacao,
+        data_devolucao: formData.data_devolucao,
+        valor: parseFloat(formData.valor)
+      };
+
       const response = await axios.post('http://localhost:8081/contrato', dadosContrato);
       console.log('Contrato cadastrado:', response.data);
-      alert(`Contrato ${numero} cadastrado com sucesso!`);
-      setNumeroContrato(numero);
+      alert(`Contrato cadastrado com sucesso! ID: ${response.data.id}`);
+
       setFormData({
         cliente: '',
         equipamento_id: '',
@@ -76,7 +118,7 @@ const CadastrarContrato = () => {
       setErrors({});
     } catch (error) {
       console.error('Erro ao cadastrar contrato:', error.response?.data || error.message);
-      alert('Erro ao cadastrar contrato');
+      alert('Erro ao cadastrar contrato: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -84,30 +126,45 @@ const CadastrarContrato = () => {
     <div className="container mt-4">
       <div className="card">
         <div className="card-header bg-primary text-white">
-          <h2 className="mb-0 text-center">Cadastrar Contrato de Locação</h2>
+          <h2 className="mb-0 text-center">Cadastrar Contrato de Locação 📝</h2>
         </div>
-
         <div className="card-body">
-          <div className="mb-3">
-            <p className="fw-bold">Contrato Nº: <span className="text-secondary">{numeroContrato || '(auto-gerado)'}</span></p>
-            <p className="text-muted">Conectado como: <strong>Administrador</strong></p>
-          </div>
-
           <form onSubmit={handleSubmit}>
-            {/* Cliente */}
             <div className="form-group mb-3">
-              <label className="form-label">Cliente (CPF/CNPJ)</label>
+              <label className="form-label">Buscar Cliente (Nome, CPF/CNPJ)</label>
               <input
                 type="text"
                 name="cliente"
                 className="form-control"
                 value={formData.cliente}
-                onChange={handleChange}
+                onChange={handleClientSearch}
+                placeholder="Digite nome, CPF ou CNPJ"
               />
               {errors.cliente && <small className="text-danger">{errors.cliente}</small>}
+              {searchResults.length > 0 && (
+                <div className="mt-2 border rounded bg-white" style={{
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  position: 'absolute',
+                  zIndex: 1000,
+                  width: '100%'
+                }}>
+                  {searchResults.map(cliente => (
+                    <div
+                      key={cliente.id}
+                      className="p-2 border-bottom hover-bg"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => selectClient(cliente)}
+                    >
+                      <div><strong>{cliente.nome}</strong></div>
+                      <div>{cliente.cpf || cliente.cnpj}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {isSearching && <div className="mt-2 text-muted">Buscando...</div>}
             </div>
 
-            {/* Equipamento */}
             <div className="form-group mb-3">
               <label className="form-label">Equipamento</label>
               <select
@@ -126,7 +183,6 @@ const CadastrarContrato = () => {
               {errors.equipamento_id && <small className="text-danger">{errors.equipamento_id}</small>}
             </div>
 
-            {/* Data Locação */}
             <div className="form-group mb-3">
               <label className="form-label">Data da Locação</label>
               <input
@@ -135,11 +191,16 @@ const CadastrarContrato = () => {
                 className="form-control"
                 value={formData.data_locacao}
                 onChange={handleChange}
+                pattern="\d{4}-\d{2}-\d{2}"
+                onInput={(e) => {
+                  if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.slice(0, 10);
+                  }
+                }}
               />
               {errors.data_locacao && <small className="text-danger">{errors.data_locacao}</small>}
             </div>
 
-            {/* Data Devolução */}
             <div className="form-group mb-3">
               <label className="form-label">Data de Devolução</label>
               <input
@@ -148,11 +209,16 @@ const CadastrarContrato = () => {
                 className="form-control"
                 value={formData.data_devolucao}
                 onChange={handleChange}
+                pattern="\d{4}-\d{2}-\d{2}"
+                onInput={(e) => {
+                  if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.slice(0, 10);
+                  }
+                }}
               />
               {errors.data_devolucao && <small className="text-danger">{errors.data_devolucao}</small>}
             </div>
 
-            {/* Valor */}
             <div className="form-group mb-3">
               <label className="form-label">Valor (R$)</label>
               <input
@@ -171,7 +237,7 @@ const CadastrarContrato = () => {
                 <Link to="/Equipamentos" className="btn btn-outline-primary me-2">
                   Cadastrar Novo Equipamento
                 </Link>
-                <Link to="/historico" className="btn btn-outline-primary">
+                <Link to="/ListarContrato" className="btn btn-outline-primary">
                   Histórico de Locações
                 </Link>
               </div>
